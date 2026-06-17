@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>G.Smeel - Экосистема с Динамической Защитой</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #121218, #07070a);
+            color: #ffffff;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+        
+        /* Многоуровневый Экран Системы Безопасности */
+        #authScreen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #0b0914, #050508);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+        .lock-icon {
+            font-size: 55px;
+            margin-bottom: 12px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        .pass-dots {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0 25px 0;
+        }
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+        }
+        .dot.active {
+            background: #ff758c;
+            border-color: #ff758c;
+            box-shadow: 0 0 12px #ff758c;
+        }
+        .dot.error {
+            background: #ff3333;
+            border-color: #ff3333;
+            box-shadow: 0 0 12px #ff3333;
+        }
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 280px;
+            width: 100%;
+        }
+        .key {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 14px 0;
+            border-radius: 50%;
+            aspect-ratio: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+        }
+        .key:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.9);
+        }
+
+        /* Блок выбора: Менять или нет */
+        #choiceBlock, #changeSuccessBlock {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 300px;
+            animation: fadeInBlock 0.4s ease;
+        }
+        @keyframes fadeInBlock {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Анимированный фон из смайликов */
+        .emoji-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.12;
+        }
+        .bg-emoji {
+            position: absolute;
+            font-size: 24px;
+            animation: floatBackground 14s infinite linear;
+        }
+        @keyframes floatBackground {
+            0% { transform: translateY(105vh) rotate(0deg); }
+            100% { transform: translateY(-10vh) rotate(360deg); }
+        }
+
+        /* Главный контейнер */
+        .app-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 500px;
+            margin: 0 auto;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Шапка */
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        header h1 {
+            font-size: 19px;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef, #a1c4fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Меню на 8 отсеков */
+        .nav-menu {
+            display: flex;
+            overflow-x: auto;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .nav-menu::-webkit-scrollbar { display: none; }
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+            transform: scale(1.03);
+        }
+
+        /* Рабочая зона */
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            position: relative;
+        }
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80%;
+            text-align: center;
+            animation: slideUp 0.4s ease;
+        }
+        .tab-content.active { display: flex; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Кнопки и блоки */
+        h2 { margin-bottom: 12px; font-size: 20px; color: #fecfef; }
+        p { font-size: 14px; color: #b3b3b3; margin-bottom: 20px; line-height: 1.5; }
+        .main-btn {
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 117, 140, 0.3);
+            transition: transform 0.1s;
+        }
+        .main-btn:active { transform: scale(0.95); }
+        
+        .sec-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            padding: 12px 25px;
+            font-size: 14px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .sec-btn:active { background: rgba(255,255,255,0.2); }
+
+        .result-box {
+            font-size: 16px;
+            font-weight: 500;
+            min-height: 55px;
+            margin-top: 15px;
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+            padding: 12px 20px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Утилиты отсеков */
+        .magic-ball { font-size: 75px; margin: 15px; cursor: pointer; transition: transform 0.4s ease; }
+        .ball-shake { animation: shakeBall 0.5s ease; }
+        @keyframes shakeBall {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            20%, 60% { transform: scale(1.1) rotate(-12deg); }
+            40%, 80% { transform: scale(1.1) rotate(12deg); }
+        }
+        .input-box {
+            width: 100%; max-width: 280px; padding: 12px; border-radius: 14px;
+            border: 2px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.5);
+            color: white; font-size: 16px; text-align: center; margin-bottom: 15px; outline: none;
+        }
+        .game-canvas {
+            width: 100%; height: 230px; background: rgba(0,0,0,0.6); border-radius: 20px;
+            position: relative; overflow: hidden; border: 2px solid rgba(255,255,255,0.08);
+        }
+        .falling-emoji { position: absolute; font-size: 32px; cursor: pointer; z-index: 10; }
+        .clicker-emoji { font-size: 90px; cursor: pointer; transition: transform 0.08s ease; margin: 15px; }
+        .blast-zone {
+            width: 100%; height: 210px; background: rgba(255, 255, 255, 0.01);
+            border: 2px dashed rgba(255,255,255,0.15); border-radius: 16px;
+            position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        .blasted-particle {
+            position: absolute; font-size: 22px; pointer-events: none;
+            animation: particleFly 0.8s forwards cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+        @keyframes particleFly { to { transform: translate(var(--mx), var(--my)) scale(0) rotate(180deg); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="authScreen">
+        <div class="lock-icon" id="lockIcon">🔒</div>
+        <h2 id="authTitle">ДОСТУП ОГРАНИЧЕН</h2>
+        <p id="authSubtitle">Введите текущий код безопасности</p>
+        
+        <div class="pass-dots" id="dotsContainer">
+            <div class="dot" id="dot0"></div>
+            <div class="dot" id="dot1"></div>
+            <div class="dot" id="dot2"></div>
+            <div class="dot" id="dot3"></div>
+        </div>
+
+        <div id="choiceBlock">
+            <button class="main-btn" style="width:100%; margin-bottom:10px;" onclick="unlockAppDirectly()">Продолжить</button>
+            <button class="sec-btn" onclick="startChangePinProcess()">Поменять код</button>
+        </div>
+
+        <div id="changeSuccessBlock">
+            <button class="main-btn" style="width:100%; background: linear-gradient(135deg, #42e695, #3bb2b8);" onclick="unlockAppDirectly()">Продолжить</button>
+        </div>
+
+        <div class="keypad" id="pinKeypad">
+            <button class="key" onclick="pressKey('1')">1</button>
+            <button class="key" onclick="pressKey('2')">2</button>
+            <button class="key" onclick="pressKey('3')">3</button>
+            <button class="key" onclick="pressKey('4')">4</button>
+            <button class="key" onclick="pressKey('5')">5</button>
+            <button class="key" onclick="pressKey('6')">6</button>
+            <button class="key" onclick="pressKey('7')">7</button>
+            <button class="key" onclick="pressKey('8')">8</button>
+            <button class="key" onclick="pressKey('9')">9</button>
+            <button class="key" style="background:transparent; border:none;" onclick="clearKeys()">❌</button>
+            <button class="key" onclick="pressKey('0')">0</button>
+            <button class="key" style="background:transparent; border:none; font-size:15px;" onclick="closeApp()">Выход</button>
+        </div>
+    </div>
+
+    <div class="emoji-bg" id="bgContainer"></div>
+
+    <div class="app-container" id="mainApp">
+        <header>
+            <h1>G.Smeel Экосистема Security v3.0 ✨</h1>
+        </header>
+
+        <nav class="nav-menu">
+            <button class="nav-btn active" onclick="switchTab(1)">🔮 Предсказание</button>
+            <button class="nav-btn" onclick="switchTab(2)">🎭 Переводчик</button>
+            <button class="nav-btn" onclick="switchTab(3)">🎮 Мини-Игра</button>
+            <button class="nav-btn" onclick="switchTab(4)">🎲 Идеи</button>
+            <button class="nav-btn" onclick="switchTab(5)">🎨 Кликер</button>
+            <button class="nav-btn" onclick="switchTab(6)">💥 Взрыв</button>
+            <button class="nav-btn" onclick="switchTab(7)">📜 Рекорды</button>
+            <button class="nav-btn" onclick="switchTab(8)">🚪 Выход</button>
+        </nav>
+
+        <div class="content-area">
+            <div class="tab-content active" id="tab1">
+                <h2>🔮 Магический Шар</h2>
+                <p>Коснись шара, чтобы расшифровать лог твоего будущего.</p>
+                <div class="magic-ball" id="magicBall" onclick="getPrediction()">🔮</div>
+                <div class="result-box" id="predictionResult">Система готова к сканированию...</div>
+            </div>
+
+            <div class="tab-content" id="tab2">
+                <h2>🎭 Смайло-Переводчик v3</h2>
+                <p>Набери любое слово, а алгоритм синтезирует секретный шифр-смайл.</p>
+                <input type="text" class="input-box" id="moodInput" placeholder="Например: стрим, код, скука" oninput="translateMood()">
+                <div class="emoji-output" id="moodOutput">✨</div>
+            </div>
+
+            <div class="tab-content" id="tab3">
+                <h2>🎮 Перехватчик Эмодзи</h2>
+                <div class="game-score">Очки: <span id="scoreVal">0</span></div>
+                <div class="game-canvas" id="gameCanvas">
+                    <div style="position: absolute; top: 45%; width:100%; text-align:center; color: rgba(255,255,255,0.25);" id="startNotice">Нажми СТАРТ для запуска волны</div>
+                </div>
+                <button class="main-btn" style="margin-top:15px;" id="gameBtn" onclick="toggleGame()">Старт</button>
+            </div>
+
+            <div class="tab-content" id="tab4">
+                <h2>🎲 Генератор Идей</h2>
+                <p>Генерация уникальной идеи под алгоритмы соцсетей.</p>
+                <div class="result-box" id="ideaResult" style="margin-bottom:20px; text-align:center; font-size:14px;">Генератор в режиме ожидания 💾</div>
+                <button class="main-btn" onclick="generateIdea()">Сгенерировать</button>
+            </div>
+
+            <div class="tab-content" id="tab5">
+                <h2>🎨 Квантовый Кликер</h2>
+                <p>Тапай по объекту. Каждые 15 тапов меняют структуру смайлика.</p>
+                <div class="clicker-emoji" id="clicker" onclick="clickEmoji()">😎</div>
+                <div class="game-score">Импульсы: <span id="clickVal">0</span></div>
+            </div>
+
+            <div class="tab-content" id="tab6">
+                <h2>💥 Сингулярность Смайлов</h2>
+                <p>Детонируй частицы кликом по экрану.</p>
+                <div class="blast-zone" id="blastZone" onclick="spawnBlast(event)">
+                    <span>АКТИВИРОВАТЬ ВЗРЫВ 🎇</span>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab7">
+                <h2>📜 Лог Достижений</h2>
+                <p>Текущие сохранённые данные сессии:</p>
+                <div class="result-box" style="text-align: left; width: 100%; max-width: 290px; display:block;">
+                    🏅 Лучший перехват: <span id="bestScore" style="color:#a1c4fd; font-weight:bold;">0</span> очков<br><br>
+                    🔥 Уровень ядра кликера: <span id="clickerLvl" style="color:#ff7eb3; font-weight:bold;">1</span><br><br>
+                    💎 Статус доступа: <span style="color:#4facfe; font-weight:bold;">Администратор</span>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab8">
+                <h2>🚪 Разрыв Соединения</h2>
+                <p>Выйти из защищённой среды обратно в чат-бот?</p>
+                <button class="main-btn" style="background: linear-gradient(135deg, #ed213a, #93291e);" onclick="closeApp()">Закрыть сессию</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPin = "0604";
+        let inputBuffer = "";
+        let authState = "LOGIN";
+        let temporaryNewPin = ""; 
+
+        const authTitle = document.getElementById('authTitle');
+        const authSubtitle = document.getElementById('authSubtitle');
+        const dotsContainer = document.getElementById('dotsContainer');
+        const pinKeypad = document.getElementById('pinKeypad');
+        const choiceBlock = document.getElementById('choiceBlock');
+        const successBlock = document.getElementById('changeSuccessBlock');
+        const lockIcon = document.getElementById('lockIcon');
+
+        function pressKey(num) {
+            if (authState === "ASK_CHOICE" || authState === "SUCCESS") return;
+            if (inputBuffer.length >= 4) return;
+            inputBuffer += num;
+            document.getElementById('dot' + (inputBuffer.length - 1)).classList.add('active');
+            if (inputBuffer.length === 4) {
+                setTimeout(processPinWorkflow, 250);
+            }
+        }
+
+        function clearKeys() {
+            inputBuffer = "";
+            for (let i = 0; i < 4; i++) {
+                document.getElementById('dot' + i).className = 'dot';
+            }
+        }
+
+        function processPinWorkflow() {
+            if (authState === "LOGIN") {
+                if (inputBuffer === currentPin) {
+                    lockIcon.innerText = "🤔";
+                    authTitle.innerText = "КОД ВЕРЕН";
+                    authSubtitle.innerText = "Хотите изменить код безопасности перед входом?";
+                    dotsContainer.style.display = "none";
+                    pinKeypad.style.display = "none";
+                    choiceBlock.style.display = "flex";
+                    authState = "ASK_CHOICE";
+                } else {
+                    triggerPinError();
+                }
+            } 
+            else if (authState === "NEW_PIN") {
+                temporaryNewPin = inputBuffer;
+                clearKeys();
+                lockIcon.innerText = "🔄";
+                authTitle.innerText = "ПОДТВЕРЖДЕНИЕ";
+                authSubtitle.innerText = "Повторите новый код:";
+                authState = "CONFIRM_PIN";
+            } 
+            else if (authState === "CONFIRM_PIN") {
+                if (inputBuffer === temporaryNewPin) {
+                    currentPin = temporaryNewPin;
+                    clearKeys();
+                    lockIcon.innerText = "✅";
+                    authTitle.innerText = "СИСТЕМА ОБНОВЛЕНА";
+                    authSubtitle.innerText = "Новый код успешно сохранён в ядро приложения!";
+                    dotsContainer.style.display = "none";
+                    pinKeypad.style.display = "none";
+                    successBlock.style.display = "flex";
+                    authState = "SUCCESS";
+                } else {
+                    triggerPinError();
+                    setTimeout(() => {
+                        lockIcon.innerText = "🛠";
+                        authTitle.innerText = "ОШИБКА СЛИЧЕНИЯ";
+                        authSubtitle.innerText = "Коды не совпали. Введите новый код заново:";
+                        authState = "NEW_PIN";
+                    }, 600);
+                }
+            }
+        }
+
+        function triggerPinError() {
+            for (let i = 0; i < 4; i++) {
+                document.getElementById('dot' + i).classList.add('error');
+            }
+            setTimeout(clearKeys, 600);
+        }
+
+        function unlockAppDirectly() {
+            document.getElementById('authScreen').style.opacity = '0';
+            document.getElementById('authScreen').style.transform = 'scale(0.95) translateY(-30px)';
+            setTimeout(() => {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('mainApp').style.opacity = '1';
+            }, 500);
+        }
+
+        functi
