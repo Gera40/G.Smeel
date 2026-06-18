@@ -2,99 +2,55 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Ultimate App</title>
+    <title>App Secure</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .screen { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
-        nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        button { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; margin: 2px; }
-        #content { padding: 15px; border: 1px solid #ddd; border-radius: 10px; min-height: 200px; }
-        .blackout { background: black !important; height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; position: fixed; top:0; left:0; z-index: 1000; }
+        body { font-family: sans-serif; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; }
+        .box { background: #333; padding: 30px; border-radius: 20px; text-align: center; width: 300px; }
+        input { padding: 10px; width: 80%; margin: 10px 0; border-radius: 5px; border: none; }
+        button { padding: 10px 20px; cursor: pointer; border-radius: 5px; border: none; background: #007bff; color: white; margin: 5px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen" class="screen">
-        <h2>Доступ ограничен</h2>
-        <input type="password" id="pass-input" placeholder="Введите код" maxlength="4">
-        <button onclick="checkAuth()">Войти</button>
+<div id="login-box" class="box">
+    <h2>Вход</h2>
+    <input type="password" id="pin" placeholder="PIN код">
+    <button onclick="login()">Войти</button>
+</div>
+
+<div id="app-box" class="box hidden">
+    <div id="view">
+        <h2>Меню</h2>
+        <button onclick="render('games')">Игры</button>
+        <button onclick="render('emoji')">Смайлы</button>
     </div>
+</div>
 
-    <div id="main-app" class="screen" style="display:none;">
-        <nav>
-            <button onclick="showTab('settings')">Настройки</button>
-            <button onclick="showTab('games')">Игры</button>
-            <button onclick="showTab('emoji')">Смайлы</button>
-            <button onclick="showTab('system')">Система</button>
-        </nav>
-        <div id="content"></div>
-    </div>
+<script>
+    const VALID_PIN = "0604";
 
-    <script>
-        // 1. ВЕЛИКИЙ СЛОВАРЬ (добавляй сюда свои 1000 слов)
-        const dictionary = {
-            "привет": "👋", "пока": "👋", "суши": "🍣", "как": "🤔", "дела": "❓", 
-            "устал": "😫", "спасибо": "🙏", "работа": "💻", "день": "☀️"
-        };
+    function login() {
+        if (document.getElementById('pin').value === VALID_PIN) {
+            document.getElementById('login-box').classList.add('hidden');
+            document.getElementById('app-box').classList.remove('hidden');
+        } else { alert("ОШИБКА"); }
+    }
 
-        let APP_CODE = localStorage.getItem('app_code') || "0604";
-        let score = parseInt(localStorage.getItem('score')) || 0;
-
-        window.onload = () => { if(localStorage.getItem('is_down') === 'true') enableBlackout(); };
-
-        function enableBlackout() {
-            document.body.className = 'blackout';
-            document.body.innerHTML = '<h1>СИСТЕМА ОТКЛЮЧЕНА</h1><button onclick="restoreSystem()">Восстановить</button>';
+    function render(tab) {
+        const view = document.getElementById('view');
+        if (tab === 'games') {
+            view.innerHTML = `<h3>Кликер</h3><button onclick="alert('Клик!')">Нажми меня</button><br><button onclick="location.reload()">Назад</button>`;
+        } else if (tab === 'emoji') {
+            view.innerHTML = `<h3>Перевод</h3><input id="word" placeholder="Слово"><button onclick="trans()">ОК</button><br><p id="res"></p><button onclick="location.reload()">Назад</button>`;
         }
+    }
 
-        function checkAuth() {
-            if (document.getElementById('pass-input').value === APP_CODE) {
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'block';
-            } else { alert("Неверный код!"); }
-        }
-
-        function showTab(tab) {
-            const content = document.getElementById('content');
-            if (tab === 'settings') {
-                content.innerHTML = `<h3>Настройки</h3><input type="text" id="new-code" placeholder="Код"><button onclick="changeCode()">Сменить</button><br><br><button onclick="deleteAccount()" style="background:red;">Удалить данные</button>`;
-            } else if (tab === 'games') {
-                content.innerHTML = `<h3>Игры</h3><button onclick="clickerGame()">Кликер (${score})</button><br><br><button onclick="gptChat()">GPT-чат</button>`;
-            } else if (tab === 'emoji') {
-                content.innerHTML = `<h3>Переводчик</h3><textarea id="text-in" placeholder="Пиши..."></textarea><br><button onclick="translateEmoji()">Перевести</button><p id="emoji-out"></p>`;
-            } else if (tab === 'system') {
-                content.innerHTML = `<button onclick="nukeSystem()" style="background:black;">ВЗРЫВ</button>`;
-            }
-        }
-
-        function translateEmoji() {
-            let text = document.getElementById('text-in').value.toLowerCase();
-            let res = text.split(' ').map(w => dictionary[w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")] || w).join(' ');
-            document.getElementById('emoji-out').innerText = res;
-        }
-
-        function nukeSystem() {
-            if (confirm("Уверены?")) { localStorage.setItem('is_down', 'true'); location.reload(); }
-        }
-
-        function restoreSystem() {
-            let code = prompt("Введите код:");
-            if (code === APP_CODE) { localStorage.setItem('is_down', 'false'); location.reload(); }
-        }
-
-        function changeCode() {
-            let old = prompt("Старый код:");
-            if (old === APP_CODE) { APP_CODE = document.getElementById('new-code').value; localStorage.setItem('app_code', APP_CODE); alert("Успешно!"); }
-        }
-
-        function deleteAccount() {
-            if (prompt("Введите код для удаления:") === APP_CODE) { localStorage.clear(); location.reload(); }
-        }
-
-        function clickerGame() { score++; localStorage.setItem('score', score); showTab('games'); }
-
-        function gptChat() { alert("GPT: Система в норме."); }
-    </script>
+    function trans() {
+        const w = document.getElementById('word').value;
+        const dict = {"привет": "👋", "пока": "👋"};
+        document.getElementById('res').innerText = dict[w] || "Нет в словаре";
+    }
+</script>
 </body>
-    </html>
-    
+</html>
