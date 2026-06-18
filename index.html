@@ -21,7 +21,8 @@ html_content = """
         <nav>
             <button onclick="showTab('settings')">Настройки</button>
             <button onclick="showTab('games')">Игры</button>
-            <button onclick="showTab('emoji')">Смайлы</button>
+            <button onclick="showTab('emoji')">Смайлик перевод 
+            </button>
             <button onclick="showTab('system')">Система</button>
         </nav>
         <div id="content"></div>
@@ -110,7 +111,7 @@ function gptChat() {
 }
 
 function translateEmoji() {
-    const map = {"привет":"👋", "как":"🤔", "дела":"?", "устал":"😫", "спасибо":"🙏", "пока":"👋"};
+    const map = {"привет":"👋", "как":"🤔", "дела":"?", "устал":"😫", "спасибо":"🙏", "пока":"👋";куку"🤡":ого"🙀"
     let text = document.getElementById('text-in').value.toLowerCase();
     document.getElementById('emoji-out').innerText = text.split(' ').map(w => map[w] || w).join(' ');
 }
