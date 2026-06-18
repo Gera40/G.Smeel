@@ -28,19 +28,7 @@
 <div id="success" class="container tab">
     <h2>ДОСТУП ЕСТЬ</h2>
     <button onclick="goApp()" style="width:100%; background:#007bff; padding: 15px; border-radius: 10px;">ПРОДОЛЖИТЬ</button>
-</div>
-
-<div id="main" class="container tab">
-    <h3>МОНО БАНК</h3>
-    <button onclick="location.reload()">Выход</button>
-</div>
-
-<script>
-    // Если кода нет, ставим 0604
-    let pin = localStorage.getItem('app_code') || "0604";
-    document.getElementById('hint').innerText = pin;
-
-    let code = "";
+ "";
     
     function input(n) {
         if (code.length < 4) {
