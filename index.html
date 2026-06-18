@@ -2,6 +2,70 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <title>MONO SYSTEM</title>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { width: 300px; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        button { padding: 15px; border-radius: 10px; border: none; background: #222; color: #fff; cursor: pointer; font-size: 18px; }
+        .tab { display: none; }
+        .active { display: block; }
+        #dots { letter-spacing: 15px; font-size: 30px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div id="auth" class="container active">
+    <h3>ВВЕДИТЕ PIN</h3>
+    <div id="dots">----</div>
+    <div class="grid">
+        <script>for(let i=1; i<=9; i++) document.write(`<button onclick="input('${i}')">${i}</button>`);</script>
+        <button onclick="input('0')" style="grid-column: 2;">0</button>
+    </div>
+</div>
+
+<div id="success" class="container tab">
+    <h2>ДОСТУП ЕСТЬ</h2>
+    <button onclick="goApp()" style="width:100%; background:#007bff;">ПРОДОЛЖИТЬ</button>
+</div>
+
+<div id="main" class="container tab">
+    <h3>MONO BANK</h3>
+    <p>Баланс: <span id="balance">0</span> монет</p>
+    <button onclick="alert('Работаем...')">Заработать</button>
+    <button onclick="alert('Магазин...')">Шоп</button>
+    <button onclick="location.reload()">Выход</button>
+</div>
+
+<script>
+    let code = "", pin = localStorage.getItem('app_code') || "0604";
+    
+    function input(n) {
+        if (code.length < 4) {
+            code += n;
+            document.getElementById('dots').innerText = "*".repeat(code.length);
+        }
+        if (code.length === 4) {
+            if (code === pin) {
+                document.getElementById('auth').classList.remove('active');
+                document.getElementById('success').classList.add('active');
+            } else {
+                alert("Ошибка!"); code = ""; document.getElementById('dots').innerText = "----";
+            }
+        }
+    }
+
+    function goApp() {
+        document.getElementById('success').classList.remove('active');
+        document.getElementById('main').classList.add('active');
+    }
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
     <title>Secure System</title>
     <style>
         body { margin: 0; background: #000; font-family: 'Segoe UI', sans-serif; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
