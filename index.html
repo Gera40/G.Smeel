@@ -2,6 +2,84 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <title>Secure System</title>
+    <style>
+        body { margin: 0; background: #000; font-family: 'Segoe UI', sans-serif; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .container { text-align: center; width: 300px; }
+        
+        /* Индикаторы ввода */
+        .dots { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .dot { width: 15px; height: 15px; border: 2px solid #fff; border-radius: 50%; transition: 0.3s; }
+        .dot.active { background: #fff; box-shadow: 0 0 10px #fff; }
+
+        /* Цифровая клавиатура */
+        .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        button { padding: 20px; font-size: 20px; border-radius: 50%; border: 1px solid #444; background: #111; color: white; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #333; }
+        
+        #main-app { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="auth-screen" class="container">
+    <h2>ВВЕДИТЕ КОД</h2>
+    <div class="dots" id="dots">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="pad">
+        <script>for(let i=1; i<=9; i++) document.write(`<button onclick="addDigit(${i})">${i}</button>`);</script>
+        <button onclick="addDigit(0)" style="grid-column: 2;">0</button>
+    </div>
+</div>
+
+<div id="main-app" class="container">
+    <h2>ДОСТУП ЕСТЬ</h2>
+    <p>Желаете изменить код доступа?</p>
+    <button onclick="changeCode()" style="border-radius:10px; width:100%;">Изменить PIN</button>
+</div>
+
+<script>
+    let currentCode = "";
+    const PIN = localStorage.getItem('app_code') || "0604";
+
+    function addDigit(n) {
+        if (currentCode.length < 4) {
+            currentCode += n;
+            document.querySelectorAll('.dot')[currentCode.length-1].classList.add('active');
+        }
+        if (currentCode.length === 4) {
+            setTimeout(checkPin, 300);
+        }
+    }
+
+    function checkPin() {
+        if (currentCode === PIN) {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+        } else {
+            alert("НЕВЕРНЫЙ КОД");
+            currentCode = "";
+            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+        }
+    }
+
+    function changeCode() {
+        let newPin = prompt("Введите новый 4-значный PIN:");
+        if (newPin && newPin.length === 4) {
+            localStorage.setItem('app_code', newPin);
+            alert("Код успешно изменен!");
+        } else {
+            alert("Ошибка: нужно 4 цифры");
+        }
+    }
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
     <title>App Secure</title>
     <style>
         body { font-family: sans-serif; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; }
