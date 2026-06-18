@@ -1,139 +1,100 @@
-# I will generate a complete, unified, and professionally styled application structure
-# consisting of index.html, style.css, and script.js, incorporating all requested features.
-
-html_content = """
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini App Pro</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Ultimate App</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .screen { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+        nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        button { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; margin: 2px; }
+        #content { padding: 15px; border: 1px solid #ddd; border-radius: 10px; min-height: 200px; }
+        .blackout { background: black !important; height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; position: fixed; top:0; left:0; z-index: 1000; }
+    </style>
 </head>
 <body>
+
     <div id="auth-screen" class="screen">
         <h2>Доступ ограничен</h2>
         <input type="password" id="pass-input" placeholder="Введите код" maxlength="4">
-        <button class="btn" onclick="checkAuth()">Войти</button>
+        <button onclick="checkAuth()">Войти</button>
     </div>
 
     <div id="main-app" class="screen" style="display:none;">
         <nav>
             <button onclick="showTab('settings')">Настройки</button>
             <button onclick="showTab('games')">Игры</button>
-            <button onclick="showTab('emoji')">Смайлик перевод 
-            </button>
+            <button onclick="showTab('emoji')">Смайлы</button>
             <button onclick="showTab('system')">Система</button>
         </nav>
         <div id="content"></div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        // 1. ВЕЛИКИЙ СЛОВАРЬ (добавляй сюда свои 1000 слов)
+        const dictionary = {
+            "привет": "👋", "пока": "👋", "суши": "🍣", "как": "🤔", "дела": "❓", 
+            "устал": "😫", "спасибо": "🙏", "работа": "💻", "день": "☀️"
+        };
+
+        let APP_CODE = localStorage.getItem('app_code') || "0604";
+        let score = parseInt(localStorage.getItem('score')) || 0;
+
+        window.onload = () => { if(localStorage.getItem('is_down') === 'true') enableBlackout(); };
+
+        function enableBlackout() {
+            document.body.className = 'blackout';
+            document.body.innerHTML = '<h1>СИСТЕМА ОТКЛЮЧЕНА</h1><button onclick="restoreSystem()">Восстановить</button>';
+        }
+
+        function checkAuth() {
+            if (document.getElementById('pass-input').value === APP_CODE) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+            } else { alert("Неверный код!"); }
+        }
+
+        function showTab(tab) {
+            const content = document.getElementById('content');
+            if (tab === 'settings') {
+                content.innerHTML = `<h3>Настройки</h3><input type="text" id="new-code" placeholder="Код"><button onclick="changeCode()">Сменить</button><br><br><button onclick="deleteAccount()" style="background:red;">Удалить данные</button>`;
+            } else if (tab === 'games') {
+                content.innerHTML = `<h3>Игры</h3><button onclick="clickerGame()">Кликер (${score})</button><br><br><button onclick="gptChat()">GPT-чат</button>`;
+            } else if (tab === 'emoji') {
+                content.innerHTML = `<h3>Переводчик</h3><textarea id="text-in" placeholder="Пиши..."></textarea><br><button onclick="translateEmoji()">Перевести</button><p id="emoji-out"></p>`;
+            } else if (tab === 'system') {
+                content.innerHTML = `<button onclick="nukeSystem()" style="background:black;">ВЗРЫВ</button>`;
+            }
+        }
+
+        function translateEmoji() {
+            let text = document.getElementById('text-in').value.toLowerCase();
+            let res = text.split(' ').map(w => dictionary[w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")] || w).join(' ');
+            document.getElementById('emoji-out').innerText = res;
+        }
+
+        function nukeSystem() {
+            if (confirm("Уверены?")) { localStorage.setItem('is_down', 'true'); location.reload(); }
+        }
+
+        function restoreSystem() {
+            let code = prompt("Введите код:");
+            if (code === APP_CODE) { localStorage.setItem('is_down', 'false'); location.reload(); }
+        }
+
+        function changeCode() {
+            let old = prompt("Старый код:");
+            if (old === APP_CODE) { APP_CODE = document.getElementById('new-code').value; localStorage.setItem('app_code', APP_CODE); alert("Успешно!"); }
+        }
+
+        function deleteAccount() {
+            if (prompt("Введите код для удаления:") === APP_CODE) { localStorage.clear(); location.reload(); }
+        }
+
+        function clickerGame() { score++; localStorage.setItem('score', score); showTab('games'); }
+
+        function gptChat() { alert("GPT: Система в норме."); }
+    </script>
 </body>
-</html>
-"""
-
-css_content = """
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-.screen { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
-button { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-button:hover { background: #0056b3; }
-#content { padding: 15px; border: 1px solid #ddd; border-radius: 10px; min-height: 200px; }
-input { padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 80%; margin-bottom: 10px; }
-.blackout { background: black !important; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; color: white; position: fixed; top:0; left:0; z-index: 1000; cursor: pointer; }
-"""
-
-js_content = """
-let APP_CODE = localStorage.getItem('app_code') || "0604";
-let score = parseInt(localStorage.getItem('score')) || 0;
-
-window.onload = () => {
-    if (localStorage.getItem('is_down') === 'true') {
-        document.body.className = 'blackout';
-        document.body.innerHTML = '<h1>Система отключена</h1><button onclick="restoreSystem()">Восстановить</button>';
-    }
-};
-
-function checkAuth() {
-    if (document.getElementById('pass-input').value === APP_CODE) {
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-    } else { alert("Неверный код!"); }
-}
-
-function showTab(tab) {
-    const content = document.getElementById('content');
-    content.innerHTML = '';
-    if (tab === 'settings') {
-        content.innerHTML = `<h3>Настройки</h3>
-            <input type="text" id="new-code" placeholder="Новый код (4 цифры)">
-            <button onclick="changeCode()">Сменить код</button><br><br>
-            <button onclick="deleteAccount()" style="background:red;">Удалить данные</button>`;
-    } else if (tab === 'games') {
-        content.innerHTML = `<h3>Игры</h3>
-            <button onclick="clickerGame()">Кликер (Счет: ${score})</button><br><br>
-            <button onclick="gptChat()">GPT-чат</button>`;
-    } else if (tab === 'emoji') {
-        content.innerHTML = `<h3>Переводчик</h3>
-            <textarea id="text-in" placeholder="Текст..."></textarea><br>
-            <button onclick="translateEmoji()">Перевести</button>
-            <p id="emoji-out"></p>`;
-    } else if (tab === 'system') {
-        content.innerHTML = `<button onclick="nukeSystem()" style="background:black;">ВЗРЫВ СИСТЕМЫ</button>`;
-    }
-}
-
-function changeCode() {
-    let old = prompt("Старый код:");
-    if (old === APP_CODE) {
-        APP_CODE = document.getElementById('new-code').value;
-        localStorage.setItem('app_code', APP_CODE);
-        alert("Код изменен!");
-    }
-}
-
-function deleteAccount() {
-    if (prompt("Введите код для подтверждения удаления:") === APP_CODE) {
-        localStorage.clear();
-        location.reload();
-    }
-}
-
-function clickerGame() {
-    score++;
-    localStorage.setItem('score', score);
-    showTab('games');
-}
-
-function gptChat() {
-    const r = ["Анализирую...", "Это гениально!", "Система занята.", "Ошибка логики.", "Конечно, я помогу."];
-    alert(r[Math.floor(Math.random() * r.length)]);
-}
-
-function translateEmoji() {
-    const map = {"привет":"👋", "как":"🤔", "дела":"?", "устал":"😫", "спасибо":"🙏", "пока":"👋";куку"🤡":ого"🙀"
-    let text = document.getElementById('text-in').value.toLowerCase();
-    document.getElementById('emoji-out').innerText = text.split(' ').map(w => map[w] || w).join(' ');
-}
-
-function nukeSystem() {
-    if (confirm("Вы уверены?")) {
-        localStorage.setItem('is_down', 'true');
-        location.reload();
-    }
-}
-
-function restoreSystem() {
-    let code = prompt("Код восстановления:");
-    if (code === APP_CODE) {
-        localStorage.setItem('is_down', 'false');
-        location.reload();
-    }
-}
-"""
-
-with open("index.html", "w", encoding="utf-8") as f: f.write(html_content)
-with open("style.css", "w", encoding="utf-8") as f: f.write(css_content)
-with open("script.js", "w", encoding="utf-8") as f: f.write(js_content)
-"""
-
+    </html>
+    
