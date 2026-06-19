@@ -6,18 +6,16 @@
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .container { width: 300px; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        button { padding: 15px; border-radius: 10px; border: none; background: #222; color: #fff; cursor: pointer; font-size: 18px; }
-        .tab { display: none; }
-        .active { display: block; }
-        #dots { letter-spacing: 15px; font-size: 30px; margin: 20px 0; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        button { padding: 20px; border-radius: 50%; border: none; background: #222; color: #fff; cursor: pointer; font-size: 20px; }
+        #dots { letter-spacing: 20px; font-size: 35px; margin: 20px 0; }
+        #cat-screen { display: none; }
     </style>
 </head>
 <body>
 
-<div id="auth" class="container active">
+<div id="auth" class="container">
     <h3>ВВЕДИТЕ PIN</h3>
-    <p style="font-size: 12px; color: #666;">(Подсказка: текущий код — <span id="hint"></span>)</p>
     <div id="dots">----</div>
     <div class="grid">
         <script>for(let i=1; i<=9; i++) document.write(`<button onclick="input('${i}')">${i}</button>`);</script>
@@ -25,10 +23,14 @@
     </div>
 </div>
 
-<div id="success" class="container tab">
-    <h2>ДОСТУП ЕСТЬ</h2>
-    <button onclick="goApp()" style="width:100%; background:#007bff; padding: 15px; border-radius: 10px;">ПРОДОЛЖИТЬ</button>
- "";
+<div id="cat-screen" class="container">
+    <h2>МОНО</h2>
+    <div style="font-size: 80px;">🐈</div>
+    <button onclick="location.reload()" style="border-radius: 10px; width: 100%;">Выход</button>
+</div>
+
+<script>
+    let code = "", pin = "0604";
     
     function input(n) {
         if (code.length < 4) {
@@ -37,217 +39,14 @@
         }
         if (code.length === 4) {
             if (code === pin) {
-                document.getElementById('auth').classList.remove('active');
-                document.getElementById('success').classList.add('active');
+                document.getElementById('auth').style.display = 'none';
+                document.getElementById('cat-screen').style.display = 'block';
             } else {
-                alert("Неверно! Попробуй еще раз.");
+                alert("НЕВЕРНЫЙ КОД");
                 code = "";
                 document.getElementById('dots').innerText = "----";
             }
         }
-    }
-
-    function goApp() {
-        document.getElementById('success').classList.remove('active');
-        document.getElementById('main').classList.add('active');
-    }
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>MONO SYSTEM</title>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { width: 300px; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        button { padding: 15px; border-radius: 10px; border: none; background: #222; color: #fff; cursor: pointer; font-size: 18px; }
-        .tab { display: none; }
-        .active { display: block; }
-        #dots { letter-spacing: 15px; font-size: 30px; margin: 20px 0; }
-    </style>
-</head>
-<body>
-
-<div id="auth" class="container active">
-    <h3>ВВЕДИТЕ PIN</h3>
-    <div id="dots">----</div>
-    <div class="grid">
-        <script>for(let i=1; i<=9; i++) document.write(`<button onclick="input('${i}')">${i}</button>`);</script>
-        <button onclick="input('0')" style="grid-column: 2;">0</button>
-    </div>
-</div>
-
-<div id="success" class="container tab">
-    <h2>ДОСТУП ЕСТЬ</h2>
-    <button onclick="goApp()" style="width:100%; background:#007bff;">ПРОДОЛЖИТЬ</button>
-</div>
-
-<div id="main" class="container tab">
-    <h3>MONO BANK</h3>
-    <p>Баланс: <span id="balance">0</span> монет</p>
-    <button onclick="alert('Работаем...')">Заработать</button>
-    <button onclick="alert('Магазин...')">Шоп</button>
-    <button onclick="location.reload()">Выход</button>
-</div>
-
-<script>
-    let code = "", pin = localStorage.getItem('app_code') || "0604";
-    
-    function input(n) {
-        if (code.length < 4) {
-            code += n;
-            document.getElementById('dots').innerText = "*".repeat(code.length);
-        }
-        if (code.length === 4) {
-            if (code === pin) {
-                document.getElementById('auth').classList.remove('active');
-                document.getElementById('success').classList.add('active');
-            } else {
-                alert("Ошибка!"); code = ""; document.getElementById('dots').innerText = "----";
-            }
-        }
-    }
-
-    function goApp() {
-        document.getElementById('success').classList.remove('active');
-        document.getElementById('main').classList.add('active');
-    }
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Secure System</title>
-    <style>
-        body { margin: 0; background: #000; font-family: 'Segoe UI', sans-serif; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .container { text-align: center; width: 300px; }
-        
-        /* Индикаторы ввода */
-        .dots { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
-        .dot { width: 15px; height: 15px; border: 2px solid #fff; border-radius: 50%; transition: 0.3s; }
-        .dot.active { background: #fff; box-shadow: 0 0 10px #fff; }
-
-        /* Цифровая клавиатура */
-        .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        button { padding: 20px; font-size: 20px; border-radius: 50%; border: 1px solid #444; background: #111; color: white; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #333; }
-        
-        #main-app { display: none; }
-    </style>
-</head>
-<body>
-
-<div id="auth-screen" class="container">
-    <h2>ВВЕДИТЕ КОД</h2>
-    <div class="dots" id="dots">
-        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-    </div>
-    <div class="pad">
-        <script>for(let i=1; i<=9; i++) document.write(`<button onclick="addDigit(${i})">${i}</button>`);</script>
-        <button onclick="addDigit(0)" style="grid-column: 2;">0</button>
-    </div>
-</div>
-
-<div id="main-app" class="container">
-    <h2>ДОСТУП ЕСТЬ</h2>
-    <p>Желаете изменить код доступа?</p>
-    <button onclick="changeCode()" style="border-radius:10px; width:100%;">Изменить PIN</button>
-</div>
-
-<script>
-    let currentCode = "";
-    const PIN = localStorage.getItem('app_code') || "0604";
-
-    function addDigit(n) {
-        if (currentCode.length < 4) {
-            currentCode += n;
-            document.querySelectorAll('.dot')[currentCode.length-1].classList.add('active');
-        }
-        if (currentCode.length === 4) {
-            setTimeout(checkPin, 300);
-        }
-    }
-
-    function checkPin() {
-        if (currentCode === PIN) {
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-        } else {
-            alert("НЕВЕРНЫЙ КОД");
-            currentCode = "";
-            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
-        }
-    }
-
-    function changeCode() {
-        let newPin = prompt("Введите новый 4-значный PIN:");
-        if (newPin && newPin.length === 4) {
-            localStorage.setItem('app_code', newPin);
-            alert("Код успешно изменен!");
-        } else {
-            alert("Ошибка: нужно 4 цифры");
-        }
-    }
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>App Secure</title>
-    <style>
-        body { font-family: sans-serif; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; }
-        .box { background: #333; padding: 30px; border-radius: 20px; text-align: center; width: 300px; }
-        input { padding: 10px; width: 80%; margin: 10px 0; border-radius: 5px; border: none; }
-        button { padding: 10px 20px; cursor: pointer; border-radius: 5px; border: none; background: #007bff; color: white; margin: 5px; }
-        .hidden { display: none; }
-    </style>
-</head>
-<body>
-
-<div id="login-box" class="box">
-    <h2>Вход</h2>
-    <input type="password" id="pin" placeholder="PIN код">
-    <button onclick="login()">Войти</button>
-</div>
-
-<div id="app-box" class="box hidden">
-    <div id="view">
-        <h2>Меню</h2>
-        <button onclick="render('games')">Игры</button>
-        <button onclick="render('emoji')">Смайлы</button>
-    </div>
-</div>
-
-<script>
-    const VALID_PIN = "0604";
-
-    function login() {
-        if (document.getElementById('pin').value === VALID_PIN) {
-            document.getElementById('login-box').classList.add('hidden');
-            document.getElementById('app-box').classList.remove('hidden');
-        } else { alert("ОШИБКА"); }
-    }
-
-    function render(tab) {
-        const view = document.getElementById('view');
-        if (tab === 'games') {
-            view.innerHTML = `<h3>Кликер</h3><button onclick="alert('Клик!')">Нажми меня</button><br><button onclick="location.reload()">Назад</button>`;
-        } else if (tab === 'emoji') {
-            view.innerHTML = `<h3>Перевод</h3><input id="word" placeholder="Слово"><button onclick="trans()">ОК</button><br><p id="res"></p><button onclick="location.reload()">Назад</button>`;
-        }
-    }
-
-    function trans() {
-        const w = document.getElementById('word').value;
-        const dict = {"привет": "👋", "пока": "👋"что"‼️":кто"❓":тупак"💩🤡";
-        document.getElementById('res').innerText = dict[w] || "Нет в словаре";
     }
 </script>
 </body>
