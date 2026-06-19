@@ -2,52 +2,168 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>MONO SYSTEM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MONO SYSTEM PRO</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { width: 300px; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
-        button { padding: 20px; border-radius: 50%; border: none; background: #222; color: #fff; cursor: pointer; font-size: 20px; }
-        #dots { letter-spacing: 20px; font-size: 35px; margin: 20px 0; }
-        #cat-screen { display: none; }
+        /* Общие стили */
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .container { width: 320px; text-align: center; display: none; flex-direction: column; align-items: center; }
+        .active { display: flex; } /* Класс для показа активного окна */
+
+        /* Стили экрана ВХОДА */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; width: 100%; }
+        .grid button { padding: 20px; border-radius: 50%; border: none; background: #222; color: #fff; cursor: pointer; font-size: 22px; transition: background 0.2s; }
+        .grid button:hover { background: #333; }
+        #dots { letter-spacing: 20px; font-size: 35px; margin: 20px 0; color: #fff; min-height: 42px;}
+
+        /* Стили экрана КОТИКА */
+        #cat-emoji { font-size: 160px; margin: 10px 0; line-height: 1; } /* ОГРОМНЫЙ КОТ */
+        #status-text { font-size: 18px; color: #aaa; margin-bottom: 20px; }
+
+        /* Навигационное меню (вкладки под котиком) */
+        .nav-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; margin-top: 10px; }
+        .nav-menu button { padding: 12px; border-radius: 10px; border: 1px solid #333; background: #111; color: #fff; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .nav-menu button:hover { background: #222; border-color: #444; }
+        .btn-exit { grid-column: span 2; background: #311 !important; border-color: #522 !important; margin-top: 5px;}
+        .btn-exit:hover { background: #522 !important; }
+
+        /* Окно смены кода */
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 20px; border-radius: 15px; border: 1px solid #333; z-index: 100; width: 280px; text-align: center; }
+        .modal input { width: 80%; padding: 10px; margin: 15px 0; background: #000; border: 1px solid #333; color: #fff; font-size: 18px; text-align: center; letter-spacing: 5px; border-radius: 5px;}
+        .modal-btns { display: flex; gap: 10px; justify-content: center; }
+        .modal button { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="auth" class="container">
-    <h3>ВВЕДИТЕ PIN</h3>
-    <div id="dots">----</div>
-    <div class="grid">
-        <script>for(let i=1; i<=9; i++) document.write(`<button onclick="input('${i}')">${i}</button>`);</script>
-        <button onclick="input('0')" style="grid-column: 2;">0</button>
+    <div id="auth-screen" class="container active">
+        <h3>ВВЕДИТЕ PIN</h3>
+        <div id="dots">----</div>
+        <div class="grid">
+            <button onclick="inputPin('1')">1</button>
+            <button onclick="inputPin('2')">2</button>
+            <button onclick="inputPin('3')">3</button>
+            <button onclick="inputPin('4')">4</button>
+            <button onclick="inputPin('5')">5</button>
+            <button onclick="inputPin('6')">6</button>
+            <button onclick="inputPin('7')">7</button>
+            <button onclick="inputPin('8')">8</button>
+            <button onclick="inputPin('9')">9</button>
+            <button onclick="inputPin('0')" style="grid-column: 2;">0</button>
+        </div>
     </div>
-</div>
 
-<div id="cat-screen" class="container">
-    <h2>МОНО</h2>
-    <div style="font-size: 80px;">🐈</div>
-    <button onclick="location.reload()" style="border-radius: 10px; width: 100%;">Выход</button>
-</div>
+    <div id="main-screen" class="container">
+        <h2>МОНО</h2>
+        <div id="cat-emoji">🐈</div> <p id="status-text">Моно чувствует себя отлично</p>
+        
+        <div class="nav-menu">
+            <button onclick="openModal('pin-modal')">🔑 Код</button>
+            <button onclick="petCat()">✋ Гладить</button>
+            <button onclick="useItem('шампунь')">🧴 Шампунь</button>
+            <button onclick="useItem('туалет')">🚽 Туалет</button>
+            <button onclick="alert('Скоро: Редактор смайликов!')">😊 Смайлы</button>
+            <button onclick="alert('Скоро: Магазин еды')">🐟 Еда</button>
+            <button onclick="location.reload()" class="btn-exit">Выход</button>
+        </div>
+    </div>
 
-<script>
-    let code = "", pin = "0604";
-    
-    function input(n) {
-        if (code.length < 4) {
-            code += n;
-            document.getElementById('dots').innerText = "*".repeat(code.length);
-        }
-        if (code.length === 4) {
-            if (code === pin) {
-                document.getElementById('auth').style.display = 'none';
-                document.getElementById('cat-screen').style.display = 'block';
-            } else {
-                alert("НЕВЕРНЫЙ КОД");
-                code = "";
-                document.getElementById('dots').innerText = "----";
+    <div id="pin-modal" class="modal">
+        <h3>Смена PIN-кода</h3>
+        <p style="font-size:12px; color:#888;">Введите 4 цифры нового кода</p>
+        <input type="text" id="new-pin-input" maxlength="4" placeholder="0000">
+        <div class="modal-btns">
+            <button onclick="saveNewPin()" style="background:#252; color:#fff;">Сохранить</button>
+            <button onclick="closeModal('pin-modal')" style="background:#333; color:#fff;">Отмена</button>
+        </div>
+    </div>
+
+    <script>
+        // Загружаем PIN из памяти или ставим дефолт "0604"
+        let currentPin = localStorage.getItem('mono_pin') || "0604";
+        let inputCode = "";
+        
+        const dots = document.getElementById('dots');
+        const authScreen = document.getElementById('auth-screen');
+        const mainScreen = document.getElementById('main-screen');
+        const statusText = document.getElementById('status-text');
+
+        // --- ЛОГИКА ВХОДА ---
+        function inputPin(num) {
+            if (inputCode.length < 4) {
+                inputCode += num;
+                // Обновляем звездочки
+                dots.innerText = "*".repeat(inputCode.length) + "-".repeat(4 - inputCode.length);
+            }
+            
+            // Если ввели 4 цифры - проверяем
+            if (inputCode.length === 4) {
+                setTimeout(() => { // Небольшая задержка для красоты
+                    if (inputCode === currentPin) {
+                        // Успех: переключаем экраны
+                        authScreen.classList.remove('active');
+                        mainScreen.classList.add('active');
+                    } else {
+                        // Ошибка: сброс
+                        alert("НЕВЕРНЫЙ КОД");
+                    }
+                    inputCode = "";
+                    dots.innerText = "----";
+                }, 200);
             }
         }
-    }
-</script>
+
+        // --- ФУНКЦИИ ВЗАИМОДЕЙСТВИЯ ---
+        function petCat() {
+            const phrases = [
+                "Моно мурчит от удовольствия! 🥰",
+                "Мяу! Ещё гладь! ✨",
+                "Моно подставил животик. 😸"
+            ];
+            statusText.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+            statusText.style.color = "#8f8"; // Зеленоватый цвет успеха
+            setTimeout(()=> { statusText.style.color = "#aaa"; }, 2000);
+        }
+
+        function useItem(item) {
+            if(item === 'шампунь') {
+                statusText.innerText = "Моно теперь чистый и пахнет свежестью! 🧼";
+            } else if(item === 'туалет') {
+                statusText.innerText = "В лотке Моно теперь идеальная чистота. 👍";
+            }
+            statusText.style.color = "#8af"; // Голубой цвет ухода
+            setTimeout(()=> { statusText.style.color = "#aaa"; }, 2000);
+        }
+
+        // --- ЛОГИКА СМЕНЫ КОДА (МОДАЛЬНОЕ ОКНО) ---
+        function openModal(id) {
+            document.getElementById(id).style.display = 'block';
+            document.getElementById('new-pin-input').focus();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+            document.getElementById('new-pin-input').value = ''; // Очистить ввод
+        }
+
+        function saveNewPin() {
+            const inputField = document.getElementById('new-pin-input');
+            const newPin = inputField.value;
+
+            // Проверка: ровно 4 цифры и это числа
+            if (newPin.length === 4 && /^\d+$/.test(newPin)) {
+                currentPin = newPin;
+                localStorage.setItem('mono_pin', newPin); // Сохраняем в память браузера
+                alert("PIN-код успешно изменен на: " + newPin);
+                closeModal('pin-modal');
+                statusText.innerText = "Безопасность обновлена. Мяу!";
+            } else {
+                alert("ОШИБКА: PIN должен состоять из 4 ЦИФР.");
+                inputField.value = '';
+                inputField.focus();
+            }
+        }
+    </script>
 </body>
-</html>
+    </html>
+    
