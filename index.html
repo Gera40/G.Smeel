@@ -2,86 +2,71 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>MONO SYSTEM PRO</title>
+    <title>MONO SYSTEM CORE</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        .nav { display: flex; background: #1a1a1a; padding: 15px; gap: 10px; overflow-x: auto; border-bottom: 2px solid #333; }
-        .tab { display: none; padding: 20px; flex-grow: 1; text-align: center; }
+        body { background: #050505; color: #00ff41; font-family: 'Courier New', monospace; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        #main-window { width: 90%; height: 85vh; border: 1px solid #00ff41; background: #000; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
+        .nav-bar { display: flex; border-bottom: 1px solid #00ff41; }
+        .nav-bar button { flex: 1; background: #000; color: #00ff41; border: none; padding: 15px; cursor: pointer; border-right: 1px solid #00ff41; }
+        .nav-bar button:hover { background: #00ff41; color: #000; }
+        .content { display: none; padding: 20px; overflow-y: auto; flex-grow: 1; }
         .active { display: block; }
-        button { padding: 12px 20px; background: #333; color: #fff; border: none; cursor: pointer; border-radius: 8px; font-weight: bold; }
-        button:hover { background: #555; }
-        
-        /* Кот-гигант */
-        #big-cat { font-size: 250px; margin: 50px 0; animation: breathe 3s infinite alternate; }
-        @keyframes breathe { from { transform: scale(1); } to { transform: scale(1.1); } }
-        
-        input { padding: 15px; width: 70%; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; font-size: 18px; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; background: #000; color: #00ff41; border: 1px solid #00ff41; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-<div class="nav">
-    <button onclick="show('home')">🏠 Дом</button>
-    <button onclick="show('bank')">💳 Монобанк</button>
-    <button onclick="show('jobs')">💼 Работа</button>
-    <button onclick="show('translator')">🔠 Переводчик</button>
-    <button onclick="show('security')">🛡️ Безопасность</button>
-</div>
+<div id="main-window">
+    <div class="nav-bar">
+        <button onclick="show('bank')">БАНК</button>
+        <button onclick="show('jobs')">РАБОТА</button>
+        <button onclick="show('translator')">ПЕРЕВОДЧИК</button>
+        <button onclick="show('security')">БЕЗОПАСНОСТЬ</button>
+    </div>
 
-<div id="home" class="tab active">
-    <h1>МОНО</h1>
-    <div id="big-cat">🐈</div>
-</div>
-
-<div id="bank" class="tab">
-    <h1>Монобанк</h1>
-    <p>Баланс: 10 000 ₴</p>
-    <button>Виртуальная карта</button>
-</div>
-
-<div id="jobs" class="tab">
-    <h1>Работа</h1>
-    <p>Выберите профессию:</p>
-    <button>Продавец</button> <button>Курьер</button> <button>Водитель</button>
-</div>
-
-<div id="translator" class="tab">
-    <h1>Переводчик</h1>
-    <input type="text" id="word" placeholder="Введите слово...">
-    <button onclick="translateWord()">Перевести</button>
-    <div id="result" style="font-size: 70px; margin-top: 30px;"></div>
-</div>
-
-<div id="security" class="tab">
-    <h1>Безопасность</h1>
-    <input type="password" id="pin" placeholder="Введите PIN">
-    <button onclick="checkPin()">Вход</button>
+    <div id="bank" class="content active"><h2>МОНОБАНК</h2><p>Система активна. Баланс: 0.00 ₴</p></div>
+    <div id="jobs" class="content">
+        <h2>ГЛОБАЛЬНАЯ БАЗА РАБОТ</h2>
+        <input type="text" id="jobSearch" placeholder="Поиск профессии...">
+        <select id="jobList" size="10"></select>
+    </div>
+    <div id="translator" class="content">
+        <h2>ПЕРЕВОДЧИК ТЕКСТА -> СМАЙЛЫ</h2>
+        <input type="text" id="rawText" placeholder="Введите предложение...">
+        <button onclick="translateFull()">ОБРАБОТАТЬ</button>
+        <div id="result" style="font-size: 24px; margin-top: 20px; word-wrap: break-word;"></div>
+    </div>
+    <div id="security" class="content">
+        <h2>БЕЗОПАСНОСТЬ</h2>
+        <input type="password" id="pin" placeholder="PIN-код">
+        <button onclick="checkPin()">АВТОРИЗАЦИЯ</button>
+    </div>
 </div>
 
 <script src="dictionary.js"></script>
 <script>
     function show(id) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
-    function translateWord() {
-        let w = document.getElementById('word').value.toLowerCase().trim();
-        document.getElementById('result').innerText = myBigDictionary[w] || "❓";
+    function translateFull() {
+        let text = document.getElementById('rawText').value.toLowerCase().split(' ');
+        let output = text.map(w => myBigDictionary[w] || w).join(' ');
+        document.getElementById('result').innerText = output;
     }
+    const jobs = ["IT-Архитектор", "Системный администратор", "Сантехник", "Frontend-разработчик", "Дизайнер"];
+    const select = document.getElementById('jobList');
+    jobs.forEach(j => select.innerHTML += `<option>${j}</option>`);
     function checkPin() {
-        if(document.getElementById('pin').value === "0604") alert("Доступ открыт!");
-        else alert("Ошибка кода!");
+        if(document.getElementById('pin').value === "гера") alert("ДОСТУП ПРЕДОСТАВЛЕН");
+        else alert("ОШИБКА");
     }
 </script>
 </body>
-    </html>
-    const myBigDictionary = {
-    "привет": "👋", "работа": "💼", "кот": "🐈", "деньги": "💰", "дом": "🏠",
-    "машина": "🚗", "солнце": "☀️", "друг": "🤝", "спасибо": "🙏", "книга": "📖",
-    "музыка": "🎵", "компьютер": "💻", "телефон": "📱", "огонь": "🔥", "звезда": "⭐",
-    "школа": "🏫", "урок": "📚", "игра": "🎮", "футбол": "⚽", "кофе": "☕",
-    "чай": "🍵", "пицца": "🍕", "яблоко": "🍎", "сердце": "❤️", "улыбка": "😊",
-    "плач": "😢", "смех": "😂", "ночь": "🌙", "день": "☀️", "время": "⏳"
-    // СЮДА МОЖНО ДОБАВИТЬ ТЫСЯЧИ СЛОВ В ЭТОМ ФОРМАТЕ
+</html>
+const myBigDictionary = {
+    "привет": "👋", "работа": "💼", "деньги": "💰", "дом": "🏠", "сантехник": "🔧", 
+    "программист": "👨‍💻", "дизайнер": "🎨", "it": "🖥️", "система": "⚙️", "безопасность": "🔒",
+    "интернет": "🌐", "код": "⌨️", "сервер": "🗄️", "курьер": "📦", "водитель": "🚚",
+    "утро": "🌅", "вечер": "🌇", "ночь": "🌙", "друг": "🤝", "успех": "🚀"
 };
-    
