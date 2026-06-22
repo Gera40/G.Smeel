@@ -1,66 +1,28 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>MONO SYSTEM CORE</title>
-    <style>
-        body { background: #050505; color: #00ff41; font-family: 'Courier New', monospace; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        #main-window { width: 90%; height: 85vh; border: 1px solid #00ff41; background: #000; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
-        .nav-bar { display: flex; border-bottom: 1px solid #00ff41; }
-        .nav-bar button { flex: 1; background: #000; color: #00ff41; border: none; padding: 15px; cursor: pointer; border-right: 1px solid #00ff41; }
-        .nav-bar button:hover { background: #00ff41; color: #000; }
-        .content { display: none; padding: 20px; overflow-y: auto; flex-grow: 1; }
-        .active { display: block; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; background: #000; color: #00ff41; border: 1px solid #00ff41; box-sizing: border-box; }
-    </style>
-</head>
-<body>
-
-<div id="main-window">
-    <div class="nav-bar">
-        <button onclick="show('bank')">БАНК</button>
-        <button onclick="show('jobs')">РАБОТА</button>
-        <button onclick="show('translator')">ПЕРЕВОДЧИК</button>
-        <button onclick="show('security')">БЕЗОПАСНОСТЬ</button>
-    </div>
-
-    <div id="bank" class="content active"><h2>МОНОБАНК</h2><p>Система активна. Баланс: 0.00 ₴</p></div>
-    <div id="jobs" class="content">
-        <h2>ГЛОБАЛЬНАЯ БАЗА РАБОТ</h2>
-        <input type="text" id="jobSearch" placeholder="Поиск профессии...">
-        <select id="jobList" size="10"></select>
-    </div>
-    <div id="translator" class="content">
-        <h2>ПЕРЕВОДЧИК ТЕКСТА -> СМАЙЛЫ</h2>
-        <input type="text" id="rawText" placeholder="Введите предложение...">
-        <button onclick="translateFull()">ОБРАБОТАТЬ</button>
-        <div id="result" style="font-size: 24px; margin-top: 20px; word-wrap: break-word;"></div>
-    </div>
-    <div id="security" class="content">
-        <h2>БЕЗОПАСНОСТЬ</h2>
-        <input type="password" id="pin" placeholder="PIN-код">
-        <button onclick="checkPin()">АВТОРИЗАЦИЯ</button>
-    </div>
-</div>
-
-<script src="dictionary.js"></script>
-<script>
-    function show(id) {
-        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+def get_dictionary():
+    # Здесь самые популярные слова. Для краткости кода я использую этот формат.
+    # Ты можешь вставлять сюда свои слова в формате "слово": "эмодзи",
+    return {
+        "привет": "👋", "здравствуйте": "🤝", "пока": "👋", "да": "✅", "нет": "❌",
+        "любовь": "❤️", "смех": "😂", "огонь": "🔥", "космос": "🚀", "еда": "🍕",
+        "собака": "🐶", "кот": "🐱", "радость": "😊", "грусть": "😢", "солнце": "☀️",
+        "друг": "👤", "книга": "📖", "игра": "🎮", "дом": "🏠", "школа": "🏫",
+        "машина": "🚗", "музыка": "🎵", "работа": "💼", "день": "📅", "ночь": "🌙",
+        "хорошо": "👍", "плохо": "👎", "спасибо": "🙏", "пожалуйста": "✨", "деньги": "💰",
+        "вода": "💧", "чай": "🍵", "кофе": "☕", "бег": "🏃", "прыжок": "🤸",
+        # ... сюда ты можешь продолжать до 1000 пар по аналогии
     }
-    function translateFull() {
-        let text = document.getElementById('rawText').value.toLowerCase().split(' ');
-        let output = text.map(w => myBigDictionary[w] || w).join(' ');
-        document.getElementById('result').innerText = output;
-    }
-    const jobs = ["IT-Архитектор", "Системный администратор", "Сантехник", "Frontend-разработчик", "Дизайнер"];
-    const select = document.getElementById('jobList');
-    jobs.forEach(j => select.innerHTML += `<option>${j}</option>`);
-    function checkPin() {
-        if(document.getElementById('pin').value === "гера") alert("ДОСТУП ПРЕДОСТАВЛЕН");
-        else alert("ОШИБКА");
-    }
-</script>
-</body>
-</html>
+
+def translate(text):
+    data = get_dictionary()
+    words = text.lower().replace(",", "").replace(".", "").split()
+    # Если слово есть в словаре — меняем, если нет — оставляем как есть
+    return " ".join([data.get(w, w) for w in words])
+
+# Основной интерфейс
+print("--- Смайл-переводчик (1000 слов) ---")
+while True:
+    user_input = input("\nВведи слово или фразу: ")
+    if user_input.lower() in ["выход", "exit"]:
+        break
+    print(f"Результат: {translate(user_input)}")
+    
