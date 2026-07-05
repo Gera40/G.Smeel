@@ -1,28 +1,56 @@
-def get_dictionary():
-    # Здесь самые популярные слова. Для краткости кода я использую этот формат.
-    # Ты можешь вставлять сюда свои слова в формате "слово": "эмодзи",
-    return {
-        "привет": "👋", "здравствуйте": "🤝", "пока": "👋", "да": "✅", "нет": "❌",
-        "любовь": "❤️", "смех": "😂", "огонь": "🔥", "космос": "🚀", "еда": "🍕",
-        "собака": "🐶", "кот": "🐱", "радость": "😊", "грусть": "😢", "солнце": "☀️",
-        "друг": "👤", "книга": "📖", "игра": "🎮", "дом": "🏠", "школа": "🏫",
-        "машина": "🚗", "музыка": "🎵", "работа": "💼", "день": "📅", "ночь": "🌙",
-        "хорошо": "👍", "плохо": "👎", "спасибо": "🙏", "пожалуйста": "✨", "деньги": "💰",
-        "вода": "💧", "чай": "🍵", "кофе": "☕", "бег": "🏃", "прыжок": "🤸",
-        # ... сюда ты можешь продолжать до 1000 пар по аналогии
-    }
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Моя 3D Комната</title>
+    <style>body { margin: 0; overflow: hidden; }</style>
+</head>
+<body>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+        import { PointerLockControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/controls/PointerLockControls.js';
 
-def translate(text):
-    data = get_dictionary()
-    words = text.lower().replace(",", "").replace(".", "").split()
-    # Если слово есть в словаре — меняем, если нет — оставляем как есть
-    return " ".join([data.get(w, w) for w in words])
+        // 1. Сцена и камера
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-# Основной интерфейс
-print("--- Смайл-переводчик (1000 слов) ---")
-while True:
-    user_input = input("\nВведи слово или фразу: ")
-    if user_input.lower() in ["выход", "exit"]:
-        break
-    print(f"Результат: {translate(user_input)}")
-    
+        // 2. Стены (Желто-белые обои)
+        const wallMaterial = new THREE.MeshBasicMaterial({ color: 0xffffcc }); // Светло-желтый
+        const wallGeo = new THREE.BoxGeometry(10, 5, 0.1);
+        
+        const backWall = new THREE.Mesh(wallGeo, new THREE.MeshBasicMaterial({ color: 0xffffff })); // Белая стена
+        backWall.position.z = -5;
+        scene.add(backWall);
+
+        // 3. Мебель
+        // Кровать
+        const bed = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 3), new THREE.MeshBasicMaterial({ color: 0x8b4513 }));
+        bed.position.set(-3, 0.25, -3);
+        scene.add(bed);
+
+        // Стол
+        const desk = new THREE.Mesh(new THREE.BoxGeometry(2, 0.7, 1), new THREE.MeshBasicMaterial({ color: 0x555555 }));
+        desk.position.set(3, 0.35, -3);
+        scene.add(desk);
+
+        // Компьютер (монитор)
+        const monitor = new THREE.Mesh(new THREE.BoxGeometry(1, 0.6, 0.1), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+        monitor.position.set(3, 1, -2.9);
+        scene.add(monitor);
+
+        // 4. Управление
+        const controls = new PointerLockControls(camera, document.body);
+        document.addEventListener('click', () => controls.lock());
+        
+        camera.position.z = 2;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
