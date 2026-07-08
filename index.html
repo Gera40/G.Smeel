@@ -1,65 +1,74 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
-        body { margin: 0; overflow: hidden; }
-        #controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 20px; }
-        button { width: 80px; height: 80px; font-size: 20px; border-radius: 50%; border: none; background: rgba(255,255,255,0.5); }
+        body { margin: 0; overflow: hidden; background: #222; }
+        #joystick { position: absolute; bottom: 50px; left: 50px; width: 100px; height: 100px; background: rgba(255,255,255,0.3); border-radius: 50%; }
+        #jumpBtn { position: absolute; bottom: 50px; right: 50px; width: 80px; height: 80px; background: orange; border-radius: 50%; }
     </style>
 </head>
 <body>
-    <div id="controls">
-        <button onclick="move(-1)">Назад</button>
-        <button onclick="move(1)">Вперед</button>
-    </div>
+    <div id="joystick"></div>
+    <div id="jumpBtn"></div>
 
     <script type="module">
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
 
         const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb);
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
+        const renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Свет
-        scene.add(new THREE.AmbientLight(0x404040));
-        const light = new THREE.PointLight(0xffffff, 1, 100);
-        light.position.set(2, 5, 2);
-        scene.add(light);
+        // Пол
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({color: 0x444444}));
+        floor.rotation.x = -Math.PI/2;
+        scene.add(floor);
 
-        // Обои (стены с неровностями)
-        const geometry = new THREE.PlaneGeometry(10, 5, 32, 32);
-        // Добавляем шум в вершины для "кривизны"
-        const pos = geometry.attributes.position;
-        for (let i = 0; i < pos.count; i++) {
-            pos.setZ(i, Math.random() * 0.2); 
-        }
-        const material = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, wireframe: false });
-        const wall = new THREE.Mesh(geometry, material);
-        scene.add(wall);
-
-        // Кровать (простой куб)
-        const bed = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 3), new THREE.MeshStandardMaterial({color: 0x8b4513}));
-        bed.position.set(0, -1, 0);
+        // Кровать (реалистичнее)
+        const bedBase = new THREE.Mesh(new THREE.BoxGeometry(2, 0.4, 3), new THREE.MeshStandardMaterial({color: 0x5d4037}));
+        const mattress = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.3, 2.8), new THREE.MeshStandardMaterial({color: 0xffffff}));
+        mattress.position.y = 0.3;
+        const bed = new THREE.Group();
+        bed.add(bedBase, mattress);
+        bed.position.set(-5, 0, 0);
         scene.add(bed);
 
-        // Стол
-        const table = new THREE.Mesh(new THREE.BoxGeometry(1, 0.8, 1), new THREE.MeshStandardMaterial({color: 0x555555}));
-        table.position.set(3, -0.6, 0);
+        // Стол и стул
+        const table = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.8, 1), new THREE.MeshStandardMaterial({color: 0x8b4513}));
+        table.position.set(3, 0.4, 0);
         scene.add(table);
+        
+        // Компьютер на столе
+        const pc = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 0.1), new THREE.MeshStandardMaterial({color: 0x000000}));
+        pc.position.set(3, 1.05, 0.4);
+        scene.add(pc);
 
-        camera.position.z = 5;
+        // Свет
+        scene.add(new THREE.DirectionalLight(0xffffff, 1));
+        
+        camera.position.set(0, 1.6, 5); // Высота глаз человека
 
-        window.move = (dir) => { camera.position.z -= dir * 0.5; };
+        // Управление ходьбой
+        let moveForward = false;
+        document.getElementById('joystick').addEventListener('touchstart', () => moveForward = true);
+        document.getElementById('joystick').addEventListener('touchend', () => moveForward = false);
 
         function animate() {
-            requestAnimationFrame(animate);
+            if(moveForward) camera.position.z -= 0.1;
+            
+            // Проверка дистанции до кровати для "сесть"
+            const dist = camera.position.distanceTo(bed.position);
+            if(dist < 2) {
+                // Здесь можно добавить логику изменения позиции камеры на bed.position
+            }
+            
             renderer.render(scene, camera);
+            requestAnimationFrame(animate);
         }
         animate();
     </script>
 </body>
-    </html>
-    
+</html>
